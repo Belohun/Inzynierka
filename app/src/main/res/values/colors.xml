@@ -1,0 +1,12 @@
+<resources>
+    <color name="colorPrimary">#546e7a</color>
+    <color name="colorPrimaryDark">#29434e</color>
+    <color name="colorPrimaryLighter">#819ca9</color>
+    <color name="colorAccent">#546e7a</color>
+    <color name="backgroundGrey">#e0e0e0</color>
+    <color name="darkcolorPrimary">#1F1B24</color>
+    <color name="darkcolorPrimaryDark">#121212</color>
+    <color name="darkcolorPrimaryLighter">#1F1B24</color>
+    <color name="darkcolorAccent">#1F1B24</color>
+    <color name="fontWhite">#FFFFFF</color>
+</resources>

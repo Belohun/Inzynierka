@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "702615989279",
+    "firebase_url": "https://inzynierka-ea1a4.firebaseio.com",
+    "project_id": "inzynierka-ea1a4",
+    "storage_bucket": "inzynierka-ea1a4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:702615989279:android:40d0b66527e96c9753392a",
+        "android_client_info": {
+          "package_name": "com.example.inzynierka"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "702615989279-kiq43v06bn6q13fcla185m1npuodb2ig.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6lrUzZ_Pj94K55j4hgeoRPw_C2WZ09P4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "702615989279-kiq43v06bn6q13fcla185m1npuodb2ig.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

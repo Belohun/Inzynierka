@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation_login"
+    app:startDestination="@id/navigation_login">
+    <fragment
+        android:id="@+id/navigation_register"
+        tools:layout="@layout/fragment_register"
+        android:name="com.example.inzynierka.ui.login.RegisterFragment">
+        <action
+            android:id="@+id/action_navigation_register_to_navigation_login"
+            app:destination="@id/navigation_login"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_right"/>
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_login"
+        tools:layout="@layout/fragment_login"
+        android:name="com.example.inzynierka.ui.login.LoginFragment"
+        >
+        <action
+            android:id="@+id/action_navigation_login_to_navigation_register"
+            app:destination="@id/navigation_register"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_left"
+            />
+    </fragment>
+</navigation>
