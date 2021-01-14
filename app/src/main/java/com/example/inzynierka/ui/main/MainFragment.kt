@@ -19,7 +19,15 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.inzynierka.R
+import com.example.inzynierka.models.Photo
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 
 class MainFragment : Fragment() {
@@ -34,20 +42,13 @@ class MainFragment : Fragment() {
     private var photoPath: String? = null
     private val IMAGE_PICK_CODE = 1000
     private val PERMISSION_CODE = 1001
+    var curFile: Uri? = null
+
+    val storageReference = Firebase.storage.reference
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
-        val images = listOf<Photo>(
-            Photo("Image1", R.drawable.image1),
-            Photo("Image2", R.drawable.image2),
-        )
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView_photos)
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.setHasFixedSize(true)
-        recyclerView.adapter = PhotoAdapter(requireContext(), images);
 
 
         val fabOpenAnim = AnimationUtils.loadAnimation(context, R.anim.fab_open)
@@ -109,8 +110,43 @@ class MainFragment : Fragment() {
             }
         }
 
-
+        listFiles()
     }
+
+    private fun listFiles() = CoroutineScope(Dispatchers.IO).launch {
+        val recyclerView = requireView().findViewById<RecyclerView>(R.id.recyclerView_photos)
+
+        try {
+            val imageUrls = mutableListOf<Photo>()
+
+            storageReference.child("images/test/").listAll().addOnSuccessListener { images ->
+                for (image in images.items) {
+                    image.downloadUrl.addOnSuccessListener { url ->
+                        imageUrls.add(
+                            Photo(
+                                url.toString(),
+                                url.toString().substringAfter("o/images%2Ftest%2")
+                                    .substringBefore(".jpg?alt=media&token")
+                            )
+                        )
+
+                    }.continueWith {
+                        val imageAdapter = PhotoAdapter(requireContext(), imageUrls)
+                        recyclerView.apply {
+                            adapter = imageAdapter
+                            layoutManager = LinearLayoutManager(requireContext())
+                        }
+                    }
+                }
+            }
+
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), e.message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
 
     private fun pickImageFromGallery() {
         //Intent to pick image
@@ -119,15 +155,16 @@ class MainFragment : Fragment() {
         startActivityForResult(intent, IMAGE_PICK_CODE)
     }
 
-        private fun convertMediaUriToPath(uri: Uri?): String? {
-            val proj = arrayOf<String>(MediaStore.Images.Media.DATA)
-            val cursor: Cursor? = requireActivity().contentResolver.query(uri!!, proj, null, null, null)
-            val column_index: Int = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-            cursor.moveToFirst()
-            val path: String = cursor.getString(column_index)
-            cursor.close()
-            return path
-        }
+    private fun convertMediaUriToPath(uri: Uri?): String? {
+        val proj = arrayOf<String>(MediaStore.Images.Media.DATA)
+        val cursor: Cursor? = requireActivity().contentResolver.query(uri!!, proj, null, null, null)
+        val column_index: Int = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+        cursor.moveToFirst()
+        val path: String = cursor.getString(column_index)
+        cursor.close()
+        return path
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -135,7 +172,7 @@ class MainFragment : Fragment() {
     ) {
         when (requestCode) {
             PERMISSION_CODE -> {
-                if (grantResults.size > 0 && grantResults[0] ==
+                if (grantResults.isNotEmpty() && grantResults[0] ==
                     PackageManager.PERMISSION_GRANTED
                 ) {
 
@@ -148,12 +185,17 @@ class MainFragment : Fragment() {
         }
 
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE){
+        if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE) {
             val path = convertMediaUriToPath(data?.data)
             Log.d("DataFromGallery", path!!)
-            photoPath = path!!
+            var file = Uri.fromFile(File(path))
+            val riversRef = storageReference.child("images/test/${file.lastPathSegment}")
+            riversRef.putFile(file).addOnSuccessListener {
+                listFiles()
+            }
 
         }
     }
