@@ -116,29 +116,54 @@ class MainFragment : Fragment() {
     private fun listFiles() = CoroutineScope(Dispatchers.IO).launch {
         val recyclerView = requireView().findViewById<RecyclerView>(R.id.recyclerView_photos)
 
+
         try {
-            val imageUrls = mutableListOf<Photo>()
+            val imageUrlsLeft = mutableListOf<Photo>()
+            val imageUrlsRight = mutableListOf<Photo>()
+            var i = 1
+
 
             storageReference.child("images/test/").listAll().addOnSuccessListener { images ->
                 for (image in images.items) {
                     image.downloadUrl.addOnSuccessListener { url ->
-                        imageUrls.add(
-                            Photo(
-                                url.toString(),
-                                url.toString().substringAfter("o/images%2Ftest%2")
-                                    .substringBefore(".jpg?alt=media&token")
+                        Log.d("i", i.toString())
+                        if (i % 2 == 0) {
+                            imageUrlsRight.add(
+                                Photo(
+                                    url.toString(),
+                                    url.toString().substringAfter("o/images%2Ftest%2F")
+                                        .substringBefore(".jpg?alt=media&token")
+                                )
                             )
-                        )
-
+                        } else {
+                            imageUrlsLeft.add(
+                                Photo(
+                                    url.toString(),
+                                    url.toString().substringAfter("o/images%2Ftest%2F")
+                                        .substringBefore(".jpg?alt=media&token")
+                                )
+                            )
+                        }
+                        i++
                     }.continueWith {
-                        val imageAdapter = PhotoAdapter(requireContext(), imageUrls)
+                        val imageAdapter =
+                            PhotoAdapter(
+                                requireContext(),
+                                imagesLeft = imageUrlsLeft,
+                                imagesRight = imageUrlsRight
+                            )
                         recyclerView.apply {
                             adapter = imageAdapter
                             layoutManager = LinearLayoutManager(requireContext())
+
                         }
                     }
+
+
                 }
+
             }
+
 
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
