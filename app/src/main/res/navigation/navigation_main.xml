@@ -4,12 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation_main"
     app:startDestination="@id/navigation_main_fragment">
-<fragment
-    android:id="@+id/navigation_main_fragment"
-    tools:layout="@layout/fragment_main"
-    android:name="com.example.inzynierka.ui.main.MainFragment"/>
-
-
+    <fragment
+        android:id="@+id/navigation_main_fragment"
+        android:name="com.example.inzynierka.ui.main.MainFragment"
+        tools:layout="@layout/fragment_main">
+        <action
+            android:id="@+id/action_navigation_main_fragment_to_navigation_fullscreenPhoto"
+            app:destination="@id/navigation_fullscreenPhoto"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_fullscreenPhoto"
+        android:name="PhotoFragment"
+        tools:layout="@layout/fragment_photo">
+        <action
+            app:popUpTo="@id/navigation_main"
+            app:popUpToInclusive="true"
+            app:launchSingleTop="true"
+            android:id="@+id/action_navigation_fullscreenPhoto_to_navigation_main_fragment"
+            app:destination="@id/navigation_main_fragment" />
+    </fragment>
 
 
 </navigation>

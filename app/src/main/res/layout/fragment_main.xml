@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="32dp"
+        android:layout_margin="16dp"
         android:backgroundTint="@color/colorAccent"
         app:tint="@color/fontWhite"
         android:src="@drawable/ic_baseline_add_24"/>
@@ -33,7 +33,7 @@
         app:layout_constraintBottom_toTopOf="@id/fab_add"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginBottom="16dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="16dp"
         app:tint="@color/fontWhite"
         android:src="@drawable/ic_baseline_photo_camera_24"/>
     <!--<TextView
@@ -61,7 +61,7 @@
         app:layout_constraintBottom_toTopOf="@id/fab_camera"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginBottom="8dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="16dp"
         app:tint="@color/fontWhite"
         android:src="@drawable/ic_baseline_photo_library_24"/>
    <!-- <TextView
