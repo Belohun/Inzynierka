@@ -54,24 +54,17 @@ class LoginFragment : Fragment() {
                 auth.signInWithEmailAndPassword(
                     loginTextView.text.toString(),
                     passwordTextView.text.toString()
-                )
-                    .addOnCompleteListener(Activity()) { task ->
+                ).addOnCompleteListener(Activity()) { task ->
                         if (task.isSuccessful) {
                             val user = auth.currentUser
                             updateUI(user)
-
-
                         } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(ContentValues.TAG, "loginUserWithEmail:failure", task.exception)
                             Toast.makeText(
                                 context, "Login failed.",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
-
                     }
-
             }
 
         }

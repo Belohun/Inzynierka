@@ -44,7 +44,6 @@ class PhotoFragment : Fragment() {
             storageReference.delete().addOnSuccessListener { // File deleted successfully
                 Toast.makeText(context, "File deleted", Toast.LENGTH_LONG)
                 view.findNavController().navigate(R.id.action_navigation_fullscreenPhoto_to_navigation_main_fragment)
-                Log.d(TAG, "onSuccess: deleted file")
             }.addOnFailureListener { // Uh-oh, an error occurred!
                 Log.d(TAG, "onFailure: did not delete file")
                 Toast.makeText(context, "Error while deleting file", Toast.LENGTH_LONG)

@@ -32,48 +32,46 @@ class RegisterFragment : Fragment() {
         val passwordTextView = root.findViewById<TextInputEditText>(R.id.password_register_text)
         root.findViewById<Button>(R.id.btn_register).setOnClickListener {
             var noErrors = true
-            if(emailTextView.text!!.isEmpty())
-            {
+            if (emailTextView.text!!.isEmpty()) {
                 emailTextView.error = "Login field must not be empty "
-                noErrors=false
-            }else{
+                noErrors = false
+            } else {
                 emailTextView.error = null
             }
-            if(!Patterns.EMAIL_ADDRESS.matcher(emailTextView.text.toString()).matches()){
-                emailTextView.error="Please enter valid email"
-                noErrors= false
-            }else{
-                emailTextView.error= null
+            if (!Patterns.EMAIL_ADDRESS.matcher(emailTextView.text.toString()).matches()) {
+                emailTextView.error = "Please enter valid email"
+                noErrors = false
+            } else {
+                emailTextView.error = null
             }
-            if(passwordTextView.text!!.isEmpty())
-            {
+            if (passwordTextView.text!!.isEmpty()) {
                 passwordTextView.error = "Password field must not be empty "
-                noErrors=false
-            }else{
+                noErrors = false
+            } else {
                 passwordTextView.error = null
             }
 
-            if(noErrors)
-            {
+            if (noErrors) {
                 try {
-                    auth.createUserWithEmailAndPassword(emailTextView.text.toString(),passwordTextView.text.toString())
+                    auth.createUserWithEmailAndPassword(
+                        emailTextView.text.toString(),
+                        passwordTextView.text.toString()
+                    )
                         .addOnCompleteListener(Activity()) { task ->
                             if (task.isSuccessful) {
                                 findNavController().navigate(R.id.action_navigation_register_to_navigation_login)
 
 
                             } else {
-                                // If sign in fails, display a message to the user.
-                                Log.w(TAG, "createUserWithEmail:failure", task.exception)
-                                Toast.makeText(context, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show()
-                                                            }
-
-                            // ...
+                                Toast.makeText(
+                                    context, "Authentication failed.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         }
 
-                }catch (e: IOException){
-                    Toast.makeText(context,"Wrong login or password",Toast.LENGTH_LONG).show()
+                } catch (e: IOException) {
+                    Toast.makeText(context, "Wrong login or password", Toast.LENGTH_LONG).show()
                 }
             }
         }

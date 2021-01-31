@@ -4,10 +4,14 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.os.Build.VERSION_CODES.BASE
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Base64.DEFAULT
+import android.util.Base64.encodeToString
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -21,13 +25,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.inzynierka.R
 import com.example.inzynierka.models.Photo
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.security.spec.PSSParameterSpec.DEFAULT
+import java.text.SimpleDateFormat
+import java.util.*
+import javax.crypto.spec.OAEPParameterSpec.DEFAULT
 
 
 class MainFragment : Fragment() {
@@ -38,11 +48,11 @@ class MainFragment : Fragment() {
     ): View? {
         return inflater.inflate(R.layout.fragment_main, container, false)
     }
-
-    private var photoPath: String? = null
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    private val currentUser = firebaseAuth.currentUser!!.uid
+    private val CAMERA_CODE = 1888
     private val IMAGE_PICK_CODE = 1000
     private val PERMISSION_CODE = 1001
-    var curFile: Uri? = null
 
     val storageReference = Firebase.storage.reference
 
@@ -82,13 +92,22 @@ class MainFragment : Fragment() {
             fabCamera.startAnimation(fabCloseAnim)
             fabGallery.startAnimation(fabCloseAnim)
             isOpen = false
+            if (checkSelfPermission(
+                    requireContext(), android.Manifest.permission.CAMERA
+                ) ==
+                PackageManager.PERMISSION_DENIED
+            ) {
+                val permissions = arrayOf(android.Manifest.permission.CAMERA);
+                requestPermissions(permissions, PERMISSION_CODE);
+            } else {
+                pickImageFromCamera();
+            }
 
         }
         fabGallery.setOnClickListener {
             fabAdd.startAnimation(fabRotateClose)
             fabCamera.startAnimation(fabCloseAnim)
             fabGallery.startAnimation(fabCloseAnim)
-
             isOpen = false
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (checkSelfPermission(
@@ -113,17 +132,20 @@ class MainFragment : Fragment() {
         listFiles()
     }
 
+    private fun pickImageFromCamera() {
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        startActivityForResult(cameraIntent, CAMERA_CODE)
+    }
+
     private fun listFiles() = CoroutineScope(Dispatchers.IO).launch {
         val recyclerView = requireView().findViewById<RecyclerView>(R.id.recyclerView_photos)
-
-
         try {
             val imageUrlsLeft = mutableListOf<Photo>()
             val imageUrlsRight = mutableListOf<Photo>()
             var i = 1
 
 
-            storageReference.child("images/test/").listAll().addOnSuccessListener { images ->
+            storageReference.child("images/$currentUser/").listAll().addOnSuccessListener { images ->
                 for (image in images.items) {
                     image.downloadUrl.addOnSuccessListener { url ->
                         Log.d("i", i.toString())
@@ -131,16 +153,16 @@ class MainFragment : Fragment() {
                             imageUrlsRight.add(
                                 Photo(
                                     url.toString(),
-                                    url.toString().substringAfter("o/images%2Ftest%2F")
-                                        .substringBefore(".jpg?alt=media&token")
+                                    url.toString().substringAfter("o/images%2F$currentUser%2F")
+                                        .substringBefore(".")
                                 )
                             )
                         } else {
                             imageUrlsLeft.add(
                                 Photo(
                                     url.toString(),
-                                    url.toString().substringAfter("o/images%2Ftest%2F")
-                                        .substringBefore(".jpg?alt=media&token")
+                                    url.toString().substringAfter("o/images%2F$currentUser%2F")
+                                        .substringBefore(".")
                                 )
                             )
                         }
@@ -215,12 +237,23 @@ class MainFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE) {
             val path = convertMediaUriToPath(data?.data)
-            Log.d("DataFromGallery", path!!)
             var file = Uri.fromFile(File(path))
-            val riversRef = storageReference.child("images/test/${file.lastPathSegment}")
+            val riversRef = storageReference.child("images/$currentUser/${file.lastPathSegment}")
             riversRef.putFile(file).addOnSuccessListener {
                 listFiles()
             }
+        }else if(resultCode == Activity.RESULT_OK && requestCode == CAMERA_CODE){
+            val baos = ByteArrayOutputStream()
+            val bitmap = data?.extras?.get("data") as Bitmap
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos)
+            val data = baos.toByteArray()
+            val timeStamp = SimpleDateFormat("yyMMdd_HHmmss").format(Date())
+            val imageName = "$timeStamp.png"
+            val riversRef = storageReference.child("images/$currentUser/${imageName}")
+            riversRef.putBytes(data).addOnSuccessListener {
+                listFiles()
+            }
+
 
         }
     }
